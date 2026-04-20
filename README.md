@@ -1,6 +1,8 @@
 # pycolmap-cuda-12 Docker Build
 
 A Docker build for [pycolmap](https://github.com/colmap/colmap) with full CUDA GPU acceleration, including cuDSS sparse solver support for high-performance global mapping.
+[prebuilt docker](https://hub.docker.com/repository/docker/setoaisle/pycolmap-cuda12-cudss-ceres/general)
+
 ## Features
 
 - **CUDA 12.4.1** with cuDNN on Ubuntu 22.04
@@ -11,7 +13,6 @@ A Docker build for [pycolmap](https://github.com/colmap/colmap) with full CUDA G
 - Multi-stage build with layer caching for fast rebuilds
 - Pinned dependencies for reproducible builds
 
-[prebuilt docker](https://hub.docker.com/repository/docker/setoaisle/pycolmap-cuda12-cudss-ceres/general)
 
 ## Requirements
 
@@ -57,47 +58,6 @@ docker run --gpus all \
     pycolmap:latest python3 /workspace/reconstruct.py
 ```
 
-## Example: Basic Reconstruction
-
-```python
-import pycolmap
-
-# Run automatic reconstruction
-pycolmap.automatic_reconstructor(
-    workspace_path="/workspace/output",
-    image_path="/workspace/images",
-)
-```
-
-## Build Architecture
-
-The Dockerfile uses a multi-stage build for efficient caching:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ Stage 1: base                                               │
-│   CUDA 12.4.1 + System packages + cuDSS                     │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Stage 2: ceres-build                                        │
-│   Ceres Solver with CUDA/cuDSS support                      │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Stage 3: colmap-build                                       │
-│   COLMAP 4.0.3 with GPU acceleration                        │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Stage 4: pycolmap (final)                                   │
-│   Python bindings + runtime environment                     │
-└─────────────────────────────────────────────────────────────┘
-```
-
 ## GPU Support
 
 ### Supported CUDA Architectures
@@ -107,10 +67,6 @@ The default build targets:
 - **SM 8.9**: RTX 40xx series (Ada Lovelace)
 
 To add support for other architectures, modify `CMAKE_CUDA_ARCHITECTURES` in the Dockerfile or use the build argument.
-
-### cuDSS Acceleration
-
-cuDSS (CUDA Direct Sparse Solver) provides GPU-accelerated sparse linear algebra for bundle adjustment. This significantly speeds up large-scale reconstructions compared to CPU-only solvers.
 
 ## License
 
